@@ -12,8 +12,8 @@ import lombok.Setter;
 public class LoginAndSignupResponse {
 
     private Long id;
-    private String refreshToken;
     private String name;
+    private String refreshToken;
     private String accessToken;
 
 }
