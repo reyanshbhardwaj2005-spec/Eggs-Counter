@@ -25,40 +25,88 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
 
+        System.out.println("========== JWT FILTER ==========");
+        System.out.println("REQUEST: " + request.getMethod() + " " + request.getRequestURI());
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
+            System.out.println("NO BEARER TOKEN");
+
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
 
+        System.out.println("TOKEN RECEIVED: YES");
+
         try {
+
             Long userId = jwtService.getIdFromToken(token);
+
+            System.out.println("USER ID FROM TOKEN: " + userId);
+
             UserEntity user = userService.getUserById(userId);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            System.out.println("USER FOUND: " + user.getUsername());
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            user.getAuthorities()
+                    );
+
             SecurityContextHolder
                     .getContext()
                     .setAuthentication(authentication);
+
+            System.out.println("AUTHENTICATION SET SUCCESSFULLY");
+
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException e) {
 
+            System.out.println("JWT ERROR: ACCESS TOKEN EXPIRED");
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"message\":\"Access token expired\"}");
+
+            response.getWriter().write(
+                    "{\"message\":\"Access token expired\"}"
+            );
 
         } catch (JwtException e) {
+
+            System.out.println("JWT ERROR: INVALID TOKEN");
+            System.out.println("ERROR: " + e.getMessage());
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"message\":\"Invalid access token\"}");
+
+            response.getWriter().write(
+                    "{\"message\":\"Invalid access token\"}"
+            );
+
         } catch (Exception e) {
+
+            System.out.println("JWT ERROR: OTHER EXCEPTION");
+            e.printStackTrace();
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"message\":\"Unauthorized\"}");
+
+            response.getWriter().write(
+                    "{\"message\":\"Unauthorized\"}"
+            );
         }
     }
 }

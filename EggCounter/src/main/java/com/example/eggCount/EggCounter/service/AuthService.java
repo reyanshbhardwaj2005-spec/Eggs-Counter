@@ -6,9 +6,7 @@ import com.example.eggCount.EggCounter.dto.SignupRequest;
 import com.example.eggCount.EggCounter.entity.UserEntity;
 import com.example.eggCount.EggCounter.repository.SessionEntityRepository;
 import com.example.eggCount.EggCounter.repository.UserEntityRepository;
-import com.sun.jdi.request.DuplicateRequestException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.eggCount.EggCounter.exception.DuplicateUserException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.modelmapper.ModelMapper;
@@ -38,7 +36,7 @@ public class AuthService {
         Optional<UserEntity> user = userEntityRepository.findByUsername(signupRequest.getUsername());
 
         if(user.isPresent()) {
-            throw new DuplicateRequestException("User with this username is already present.");
+            throw new DuplicateUserException("User with this username is already present.");
         } else {
 
             UserEntity userToBeSaved = modelMapper.map(signupRequest, UserEntity.class);

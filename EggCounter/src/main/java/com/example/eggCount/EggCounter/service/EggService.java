@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,13 +47,20 @@ public class EggService {
             throw new RuntimeException("You are not allowed to update another user's eggs");
         }
 
-        EggEntity egg = eggEntityRepository.findByUserEntityId(userId)
-                .orElseThrow(() -> new RuntimeException("Egg record not found for this user"));
+        Optional<EggEntity> existingEgg = eggEntityRepository.findByUserEntityId(userId);
+        EggEntity egg;
+
+        if (existingEgg.isPresent()) {
+            egg = existingEgg.get();
+        } else {
+            egg = new EggEntity();
+            egg.setUserEntity(user);
+        }
 
         egg.setNumberOfEggs(addEgg.getNumberOfEggs());
         egg.setCreatedAt(LocalDateTime.now());
-        EggEntity updatedEgg = eggEntityRepository.save(egg);
-        return convertToDTO(updatedEgg);
+        EggEntity savedEgg = eggEntityRepository.save(egg);
+        return convertToDTO(savedEgg);
     }
 
     private EggsInformation convertToDTO(EggEntity egg) {
