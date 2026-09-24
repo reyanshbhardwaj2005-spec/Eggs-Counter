@@ -48,7 +48,7 @@ public class AuthService {
             String refreshToken =jwtService.generateRefreshToken(savedUser);
 
             service.generateNewSession(savedUser, refreshToken);
-            return new LoginAndSignupResponse(savedUser.getId(), accessToken, refreshToken);
+            return new LoginAndSignupResponse(savedUser.getId(),savedUser.getName(), accessToken, refreshToken);
         }
     }
 
@@ -62,7 +62,7 @@ public class AuthService {
         String refresh_token = jwtService.generateRefreshToken(user);
 
         service.generateNewSession(user, refresh_token);
-        return new LoginAndSignupResponse(user.getId(), access_token, refresh_token);
+        return new LoginAndSignupResponse(user.getId(), user.getName(), access_token, refresh_token);
     }
 
     public @Nullable LoginAndSignupResponse refreshToken(String refreshToken) {
@@ -76,7 +76,7 @@ public class AuthService {
         Long userId = jwtService.getIdFromToken(refreshToken);
         UserEntity userEntity = userService.getUserById(userId);
         String accessToken = jwtService.generateAccessToken(userEntity);
-        return new LoginAndSignupResponse(userEntity.getId(), accessToken, refreshToken);
+        return new LoginAndSignupResponse(userEntity.getId(),userEntity.getName(), accessToken, refreshToken);
     }
 
     @Transactional
