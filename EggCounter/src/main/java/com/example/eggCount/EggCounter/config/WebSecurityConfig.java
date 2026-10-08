@@ -32,6 +32,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/eggs/**").permitAll()
+                        .requestMatchers("/health").permitAll()
                         .anyRequest()
                         .authenticated())
 
